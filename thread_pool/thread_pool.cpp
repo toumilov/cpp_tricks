@@ -42,6 +42,8 @@ void ThreadPool::Worker::join()
 			thread_.join();
 			started_ = false;
 			done_ = false;
+			mtx_.unlock();
+			break;
 		}
 		mtx_.unlock();
 		std::this_thread::sleep_for( std::chrono::milliseconds( 200 ) );

@@ -37,7 +37,7 @@ public:
 		template <class Fn, class... Args>
 		void wrapper( Fn &&fn, Args &&... args )
 		{
-			fn( args... );
+			fn( std::forward<Args>( args )... );
 			mtx_.lock();
 			done_ = true;
 			mtx_.unlock();

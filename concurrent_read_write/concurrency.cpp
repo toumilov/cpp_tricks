@@ -7,7 +7,8 @@
 #include <mutex>
 #include <functional>
 #include <vector>
-#include "scope_exit.hpp"
+#include <utility>
+
 
 #define READ_TIME 1
 #define WRITE_TIME 2
@@ -25,16 +26,14 @@ public:
 
 	T get()
 	{
-		acquire_read();
-		auto guard = on_scope_exit( [this](){ release_read(); } );
+		ScopedReadLock guard( *this );
 		std::this_thread::sleep_for( std::chrono::milliseconds( READ_TIME ) );
 		return data_;
 	}
 
 	void set( const T &value )
 	{
-		acquire_write();
-		auto guard = on_scope_exit( [this](){ release_write(); } );
+		ScopedWriteLock guard( *this );
 		std::this_thread::sleep_for( std::chrono::milliseconds( WRITE_TIME ) );
 		data_ = value;
 	}
@@ -43,6 +42,36 @@ private:
 	T data_;
 	std::atomic<int> readers_;
 	std::atomic<bool> write_flag_;
+
+	struct ScopedReadLock
+	{
+		ConcurrentContainer &container;
+
+		ScopedReadLock( ConcurrentContainer &c ) :
+			container( c )
+		{
+			container.acquire_read();
+		}
+		~ScopedReadLock()
+		{
+			container.release_read();
+		}
+	};
+
+	struct ScopedWriteLock
+	{
+		ConcurrentContainer &container;
+
+		ScopedWriteLock( ConcurrentContainer &c ) :
+			container( c )
+		{
+			container.acquire_write();
+		}
+		~ScopedWriteLock()
+		{
+			container.release_write();
+		}
+	};
 
 	inline void acquire_read()
 	{
@@ -116,7 +145,7 @@ int main()
 	std::vector<std::thread> threads;
 
 	// Compare mutex lock vs concurrent container
-	int iterations = 10000;
+	int iterations = 1000;
 
 	MutexContainer<int> mc( 5 );
 	auto start = std::chrono::steady_clock::now();
