@@ -1,12 +1,16 @@
 
 CURRENT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+SONAME=libtest.so.1
+FULL_LIB_NAME=libtest.so.1.0.0
 
 .PHONY: all libtest app clean
 
 all: libtest.so app
 
 libtest.so: libtest.o
-	$(CXX) $^ -shared -fvisibility=hidden -o $@
+	$(CXX) $^ -shared -Wl,-soname,${SONAME} -fvisibility=hidden -o $(FULL_LIB_NAME)
+	ln -s $(FULL_LIB_NAME) $(SONAME)
+	ln -s $(FULL_LIB_NAME) $@
 
 app: app.o
 	$(CXX) $^ -L $(CURRENT_DIR) -ltest -ldl -Wl,-rpath=$(CURRENT_DIR) -o $@

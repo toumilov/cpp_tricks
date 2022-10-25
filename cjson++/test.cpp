@@ -313,6 +313,15 @@ TEST(JsonGroup, ObjectModify)
 	CHECK( jo["a"].is_bool() );
 	CHECK( jo["b"].is_null() );
 	CHECK( jo["c"].is_string() );
+
+	Json branch( Json::Object );
+	branch.set( "name", "test" )
+		  .set( "value", 5 );
+	jo.set( "branch", branch );
+	CHECK_EQUAL( 3, jo.size() );
+	CHECK( jo.has( "branch" ) );
+	STRCMP_EQUAL( "test", jo["branch"]["name"].as_string().c_str() );
+	CHECK_EQUAL( 5, jo["branch"]["value"].as_int() );
 }
 
 TEST(JsonGroup, Iterator)
@@ -685,3 +694,4 @@ TEST(JsonGroup, SpecialCharactersTest)
 	CHECK( Json::parse( dump, res ) );
 	STRCMP_EQUAL( " \" \\ \b \f \n \r \t ", res["string"].as_string().c_str() );
 }
+

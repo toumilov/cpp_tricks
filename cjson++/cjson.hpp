@@ -260,7 +260,7 @@ public:
 		return data_->data < rhs.data_->data;
 	}
 
-	const Json* const operator->() const
+	const Json* operator->() const
 	{
 		return this;
 	}
@@ -283,6 +283,12 @@ public:
 			swap( Json( String ) );
 		}
 		cJSON_SetValuestring( data_->data, value );
+		return *this;
+	}
+
+	Json& operator=( const std::string &value )
+	{
+		operator=( value.c_str() );
 		return *this;
 	}
 
@@ -550,7 +556,7 @@ public:
 	{
 		if ( type() != Object )
 		{
-			Json();
+			return Json();
 		}
 		cJSON* item = cJSON_GetObjectItemCaseSensitive( data_->data, key );
 		if ( item )
@@ -573,7 +579,7 @@ public:
 	{
 		if ( type() != Object )
 		{
-			Json();
+			return Json();
 		}
 		cJSON* item = cJSON_GetObjectItemCaseSensitive( data_->data, key );
 		if ( item )
@@ -858,3 +864,4 @@ public:
 		return retval;
 	}
 };
+
