@@ -1,0 +1,50 @@
+
+SRC_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+BUILD_DIR := $(SRC_DIR)build
+
+# Plugin library
+LIBPLUGIN_VERSION_MAJOR = 1
+LIBPLUGIN_VERSION_MINOR = 0
+LIBPLUGIN_VERSION_PATCH = 0
+LIBPLUGIN_VERSION = $(LIBPLUGIN_VERSION_MAJOR).$(LIBPLUGIN_VERSION_MINOR).$(LIBPLUGIN_VERSION_PATCH)
+LIBPLUGIN_NAME = libplugin.so
+LIBPLUGIN_SONAME = $(LIBPLUGIN_NAME).$(LIBPLUGIN_VERSION_MAJOR)
+
+# Sample plugin
+PLUGIN_NAME = test_plugin.so
+PLUGIN_VERSION_MAJOR = 1
+PLUGIN_VERSION_MINOR = 0
+PLUGIN_VERSION_PATCH = 0
+PLUGIN_VERSION = $(PLUGIN_VERSION_MAJOR).$(PLUGIN_VERSION_MINOR).$(PLUGIN_VERSION_PATCH)
+PLUGIN_SONAME = $(PLUGIN_NAME).$(PLUGIN_VERSION_MAJOR)
+
+CXXFLAGS += -std=c++17 -fPIC -g -Wall -Werror -I$(SRC_DIR) \
+	-DPLUGIN_VERSION_MAJOR=$(PLUGIN_VERSION_MAJOR) -DPLUGIN_VERSION_MINOR=$(PLUGIN_VERSION_MINOR) -DPLUGIN_VERSION_PATCH=$(PLUGIN_VERSION_PATCH)
+LDLIBS := -lpthread
+
+$(BUILD_DIR)/%.cpp.o: %.cpp
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+.PHONY: all app libplugin test_plugin clean
+
+all: libplugin test_plugin app
+
+libplugin: libplugin.o
+	$(CXX) $^ -shared -Wl,-soname,$(LIBPLUGIN_SONAME) -fvisibility=hidden -o $(LIBPLUGIN_SONAME) -DDLL_EXPORT -ldl \
+	-o $(LIBPLUGIN_NAME).$(LIBPLUGIN_VERSION)
+	ln -sf $(LIBPLUGIN_NAME).$(LIBPLUGIN_VERSION) $(LIBPLUGIN_SONAME)
+
+test_plugin: test_plugin.o libplugin
+	$(CXX) $< -shared -Wl,-soname,$(PLUGIN_SONAME) -o $(PLUGIN_NAME).$(PLUGIN_VERSION)
+	ln -sf $(PLUGIN_NAME).$(PLUGIN_VERSION) $(PLUGIN_SONAME)
+
+app: app.o libplugin
+	$(CXX) $< -L$(SRC_DIR) $(CURRENT_DIR) -Wl,-rpath,\$${ORIGIN} -ldl -l:$(LIBPLUGIN_SONAME) -o $@
+
+clean:
+	rm -rf $(BUILD_DIR)
+	rm -f *.o
+	rm -f app
+	rm -f $(LIBPLUGIN_SONAME)*
+	rm -f $(PLUGIN_SONAME)*
