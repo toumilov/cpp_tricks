@@ -22,7 +22,7 @@ app.o: $(CURRENT_DIR)app.cpp
 	$(CXX) -I $(CURRENT_DIR) -c -o $@ $<
 
 clean:
-	rm -rf libtest.so
+	rm -rf libtest.so*
 	rm -rf app
 	rm -rf *.o
 
