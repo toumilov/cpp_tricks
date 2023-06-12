@@ -11,14 +11,18 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-.PHONY: all test clean
+.PHONY: all test unique_ptr clean
 
-all: test
+all: test unique_ptr
 
 test: $(OBJ_FILES)
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
+unique_ptr: scope_exit_unique_ptr.cpp
+	$(CXX) $^ -o $@
+
 clean:
 	rm -fr $(BUILD_DIR)
-	rm test
+	rm -f test
+	rm -f unique_ptr
 
