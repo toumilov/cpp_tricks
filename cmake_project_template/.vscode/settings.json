@@ -1,0 +1,11 @@
+{
+	"cmake.sourceDirectory": "/home/andrey/dev/sandbox/cmake",
+	"cmake.configureOnOpen": true,
+    "cmake.options.statusBarVisibility": "visible",
+    "cmake.exportCompileCommandsFile": true,
+    "editor.rulers": [
+        120
+    ],
+    "editor.renderWhitespace": "all",
+    "editor.detectIndentation": false
+}

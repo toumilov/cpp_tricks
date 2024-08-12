@@ -1,0 +1,73 @@
+{
+	"version": 6,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 26,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "x64_debug",
+			"displayName": "x86-64 debug",
+			"description": "Development host debug build",
+			"generator": "Unix Makefiles",
+			"binaryDir": "${sourceDir}/build/x64-debug",
+			"toolchainFile": "${workspaceFolder}/toolchains/x86_gcc.cmake",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+				"x86": {
+					"type": "BOOL",
+					"value": "ON"
+				},
+				"FEATURE_BAR": "ON"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "x64_debug",
+			"configurePreset": "x64_debug",
+			"jobs": 8
+		}
+	],
+	"testPresets": [
+		{
+			"name": "Unittests",
+			"configurePreset": "x64_debug",
+			"output": {"outputOnFailure": true},
+			"execution": {"noTestsAction": "error", "stopOnFailure": true}
+		}
+	],
+	"packagePresets": [
+		{
+			"name": "Debian",
+			"configurePreset": "x64_debug",
+			"generators": [
+				"DEB"
+			]
+		}
+	],
+	"workflowPresets": [
+		{
+			"name": "x86",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "x64_debug"
+				},
+				{
+					"type": "build",
+					"name": "x64_debug"
+				},
+				{
+					"type": "test",
+					"name": "unittests"
+				},
+				{
+					"type": "package",
+					"name": "Debian"
+				}
+			]
+		}
+	]
+}
